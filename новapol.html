@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивно ръководство за шиене на калъф за пуф</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the Inter font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        .step-container {
+            min-height: 400px; /* Ensure enough space for content */
+        }
+        .fabric-piece {
+            background-color: #a78bfa; /* Purple-ish color for fabric */
+            border: 2px dashed #8b5cf6; /* Darker purple dashed border */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            transition: all 0.5s ease-in-out;
+            border-radius: 0.5rem; /* Rounded corners */
+        }
+        .sewing-line {
+            position: absolute;
+            background-color: #ef4444; /* Red color for sewing line */
+            height: 2px;
+            animation: drawLine 1.5s forwards;
+            transform-origin: left center;
+        }
+        @keyframes drawLine {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
+        }
+        /* New keyframe animation for vertical line */
+        @keyframes drawVerticalLine {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+        .zipper {
+            background-color: #6b7280; /* Gray for zipper */
+            height: 8px;
+            width: 80%;
+            border-radius: 4px;
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            transform: translateY(-50%);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+        .message-box.show {
+            display: block;
+        }
+        /* Added loading spinner styles */
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #6366f1;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: none; /* Hidden by default */
+        }
+        .loading-spinner.show {
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-4xl w-full bg-white rounded-xl shadow-lg p-6 sm:p-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">
+            Интерактивно ръководство за шиене на калъф за пуф
+        </h1>
+
+        <div id="step-content" class="step-container relative flex flex-col items-center justify-center bg-gray-100 rounded-lg p-4 mb-6 transition-all duration-500 ease-in-out overflow-hidden">
+            </div>
+
+        <p id="step-description" class="text-lg text-gray-700 text-center mb-6 leading-relaxed">
+            </p>
+
+        <div class="flex justify-center space-x-4 mb-8">
+            <button id="prev-btn" class="px-6 py-3 bg-indigo-500 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition-transform transform hover:scale-105">
+                Предишна стъпка
+            </button>
+            <button id="next-btn" class="px-6 py-3 bg-indigo-700 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-700 focus:ring-opacity-75 transition-transform transform hover:scale-105">
+                Следваща стъпка
+            </button>
+        </div>
+
+     
+
+    <script>
+        // Function to show custom message box instead of alert()
+        function showMessageBox(message) {
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-text');
+            const messageOkBtn = document.getElementById('message-ok-btn');
+
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+
+            messageOkBtn.onclick = () => {
+                messageBox.classList.remove('show');
+            };
+        }
+
+        const steps = [
+            {
+                title: "1. Измерване и изрязване на плата",
+                description: "Първо, изгладете плата. Ще изрежем три основни части: две квадратни за горна и долна част и една дълга правоъгълна за страните. За пуф с диаметър 90 см и височина 40 см, изрежете два квадрата 95x95 см и един правоъгълник 365x45 см (включващи резерви за шев).",
+                html: `
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full justify-center items-center">
+                        <div class="fabric-piece w-32 h-32 sm:w-40 sm:h-40 flex-shrink-0">Горна част (95x95 см)</div>
+                        <div class="fabric-piece w-32 h-32 sm:w-40 sm:h-40 flex-shrink-0">Долна част (95x95 см)</div>
+                        <div class="fabric-piece w-64 h-24 sm:w-80 sm:h-32 flex-shrink-0">Странична част (365x45 см)</div>
+                    </div>
+                `
+            },
+            {
+                title: "2. Подготовка на ципа",
+                description: "Вземете дългата странична част. От едната дълга страна, направете временен шев по средата, оставяйки отвор за ципа. Разгладете шева и позиционирайте ципа отгоре, като го закрепите с карфици. След това го пришийте здраво с краче за цип и разпорете временния шев.",
+                html: `
+                    <div class="relative fabric-piece w-full max-w-xl h-48 sm:h-64">
+                        <p class="absolute top-4 left-1/2 -translate-x-1/2 text-sm text-center">Странична част</p>
+                        <div class="absolute w-4/5 h-2 bg-gray-300 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                        <div class="zipper"></div>
+                        <div class="sewing-line" style="width: 80%; top: calc(50% - 10px); left: 10%;"></div>
+                        <div class="sewing-line" style="width: 80%; top: calc(50% + 10px); left: 10%;"></div>
+                        <p class="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-center">Пришит цип</p>
+                    </div>
+                `
+            },
+            {
+                title: "3. Сглобяване на страничната част",
+                description: "Сгънете правоъгълната странична част (вече с ципа) на две по късата страна, с лицевите страни една към друга. Зашийте късите краища, за да оформите голям цилиндър. Това ще бъде страничната част на калъфа.",
+                html: `
+                    <div class="relative fabric-piece w-full max-w-xs h-64 flex-col justify-between p-4">
+                        <div class="zipper w-4/5 h-2 bg-gray-300 rounded-full"></div>
+                        <p class="text-sm text-center">Сгъната странична част</p>
+                        <div class="sewing-line" style="height: 100%; width: 2px; right: 0; top: 0; transform-origin: top center; transform: scaleY(0);"></div>
+                        <p class="text-sm text-center">Зашити краища</p>
+                    </div>
+                `
+            },
+            {
+                title: "4. Прикрепване на горната и долна част",
+                description: "Обърнете цилиндъра наопаки. Вземете една от квадратните части и я прикрепете към единия отворен край на цилиндъра, като лицевите страни са една към друга. Използвайте много карфици, за да закрепите равномерно. Зашийте внимателно. Повторете за другата квадратна част.",
+                html: `
+                    <div class="relative w-full h-64 flex justify-center items-center">
+                        <div class="relative fabric-piece w-48 h-48 rounded-full flex items-center justify-center text-center z-10">
+                            Горна/Долна част
+                        </div>
+                        <div class="absolute fabric-piece w-40 h-56 rounded-lg flex items-center justify-center text-center -rotate-12 z-0 opacity-75">
+                            Цилиндър
+                        </div>
+                        <div class="sewing-line absolute w-48 h-2px bg-red-500 rounded-full" style="border-radius: 50%; width: 120px; height: 120px; border: 2px dashed #ef4444; animation: none;"></div>
+                    </div>
+                `
+            },
+            {
+                title: "5. Завършване",
+                description: "Отворете ципа и обърнете калъфа на дясната страна. Проверете всички шевове. Напълнете вътрешния калъф (ако имате такъв) с пълнеж и го поставете във външния калъф. Затворете ципа и вашият пуф е готов!",
+                html: `
+                    <div class="relative w-full h-64 flex justify-center items-center">
+                        <div class="relative w-48 h-48 rounded-full bg-green-400 flex items-center justify-center text-center text-white font-bold text-xl">
+                            <p>ГОТОВ ПУФ!</p>
+                            <div class="zipper absolute w-3/4 h-2 bg-gray-600 rounded-full" style="top: 70%; left: 12.5%;"></div>
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+        const stepContent = document.getElementById('step-content');
+        const stepDescription = document.getElementById('step-description');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        // LLM Feature elements
+        const designPromptInput = document.getElementById('designPromptInput');
+        const generateDesignBtn = document.getElementById('generateDesignBtn');
+        const designOutput = document.getElementById('designOutput');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        function renderStep() {
+            const step = steps[currentStep];
+            stepContent.innerHTML = step.html;
+            stepDescription.innerHTML = `<h2 class="text-2xl font-semibold text-gray-800 mb-4">${step.title}</h2>${step.description}`;
+
+            prevBtn.disabled = currentStep === 0;
+            nextBtn.disabled = currentStep === steps.length - 1;
+
+            // Re-trigger animations based on current step
+            if (currentStep === 2) { // Step "3. Сглобяване на страничната част"
+                const verticalLine = stepContent.querySelector('.sewing-line');
+                if (verticalLine) {
+                    verticalLine.style.animation = 'none'; // Reset
+                    void verticalLine.offsetWidth; // Trigger reflow
+                    verticalLine.style.animation = 'drawVerticalLine 1.5s forwards'; // New animation for vertical line
+                }
+            } else if (currentStep === 3) { // Step "4. Прикрепване на горната и долна част"
+                const circularLine = stepContent.querySelector('.sewing-line');
+                if (circularLine) {
+                    circularLine.style.animation = 'none'; // Reset
+                    void circularLine.offsetWidth; // Trigger reflow
+                    // Re-apply specific styles for circular line
+                    circularLine.style.border = '2px dashed #ef4444';
+                    circularLine.style.width = '120px';
+                    circularLine.style.height = '120px';
+                    circularLine.style.borderRadius = '50%';
+                    circularLine.style.transform = 'scale(1)'; // Ensure it's visible
+                }
+            } else { // Default horizontal line animation for other steps
+                const sewingLines = stepContent.querySelectorAll('.sewing-line');
+                sewingLines.forEach(line => {
+                    line.style.animation = 'none'; // Reset animation
+                    void line.offsetWidth; // Trigger reflow
+                    line.style.animation = 'drawLine 1.5s forwards'; // Re-apply animation
+                });
+            }
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderStep();
+            } else {
+                showMessageBox("Поздравления! Завършихте ръководството за шиене на калъф за пуф.");
+            }
+                            
+        });
+
+        // Initial render
+        renderStep();
+    </script>
+</body>
+</html>
